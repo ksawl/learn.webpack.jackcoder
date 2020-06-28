@@ -2,12 +2,14 @@ const path = require("path");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const { VueLoaderPlugin } = require("vue-loader");
 
 const PATHS = {
+    assetsDirName: "assets",
+    distDirName: "dist",
     src: path.join(__dirname, "../src"),
     dist: path.join(__dirname, "../dist"),
-    assets: "assets",
 };
 
 module.exports = {
@@ -16,11 +18,34 @@ module.exports = {
     },
     entry: {
         app: PATHS.src,
+        sudo: `${PATHS.src}/sudo.js`,
     },
     output: {
-        filename: `${PATHS.assets}/js/[name].js`,
+        filename: `${PATHS.assetsDirName}/js/[name].[hash].js`,
         path: PATHS.dist,
         publicPath: "/",
+    },
+    optimization: {
+        splitChunks: {
+            cacheGroups: {
+                vendor: {
+                    test: /node_modules/,
+                    name: "vendor",
+                    /* name(module, chunks, cacheGroupKey) {
+                        const moduleFileName = module
+                            .identifier()
+                            .split("\\")
+                            .reduceRight((item) => item);
+                        const allChunksNames = chunks
+                            .map((item) => item.name)
+                            .join("~");
+                        return `${cacheGroupKey}-${allChunksNames}-${moduleFileName}`;
+                    }, */
+                    chunks: "all",
+                    enforce: true,
+                },
+            },
+        },
     },
     module: {
         rules: [
@@ -81,8 +106,9 @@ module.exports = {
     },
     plugins: [
         new VueLoaderPlugin(),
+        new CleanWebpackPlugin(),
         new MiniCssExtractPlugin({
-            filename: `${PATHS.assets}css/[name].css`,
+            filename: `${PATHS.assetsDirName}/css/[name].[hash].css`,
         }),
         new HtmlWebpackPlugin({
             hash: false,
@@ -91,7 +117,7 @@ module.exports = {
         }),
         new CopyWebpackPlugin({
             patterns: [
-                { from: `${PATHS.src}/img`, to: `${PATHS.assets}/img` },
+                { from: `${PATHS.src}/img`, to: `${PATHS.assetsDirName}/img` },
                 { from: `${PATHS.src}/static`, to: "" },
             ],
         }),
