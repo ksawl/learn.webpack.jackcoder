@@ -9,6 +9,7 @@ const PATHS = {
     assetsDirName: "assets",
     distDirName: "dist",
     src: path.join(__dirname, "../src"),
+    srcAssets: path.join(__dirname, "../src/assets"),
     dist: path.join(__dirname, "../dist"),
 };
 
@@ -89,6 +90,11 @@ module.exports = {
                 options: { name: "[name].[ext]" },
             },
             {
+                test: /\.(woff(2)?\ttf|eot)$/,
+                loader: "file-loader",
+                options: { name: "[name].[ext]" },
+            },
+            {
                 test: /\.vue$/,
                 loader: "vue-loader",
                 options: {
@@ -101,6 +107,8 @@ module.exports = {
     },
     resolve: {
         alias: {
+            "@assets": PATHS.srcAssets,
+            "@": PATHS.src,
             vue$: "vue/dist/vue.js",
         },
     },
@@ -112,13 +120,20 @@ module.exports = {
         }),
         new HtmlWebpackPlugin({
             hash: false,
-            template: `${PATHS.src}/index.html`,
+            template: `${PATHS.srcAssets}/index.html`,
             filename: "./index.html",
         }),
         new CopyWebpackPlugin({
             patterns: [
-                { from: `${PATHS.src}/img`, to: `${PATHS.assetsDirName}/img` },
-                { from: `${PATHS.src}/static`, to: "" },
+                {
+                    from: `${PATHS.srcAssets}/img`,
+                    to: `${PATHS.assetsDirName}/img`,
+                },
+                {
+                    from: `${PATHS.srcAssets}/fonts`,
+                    to: `${PATHS.assetsDirName}/fonts`,
+                },
+                { from: `${PATHS.srcAssets}/static`, to: "" },
             ],
         }),
     ],
